@@ -319,6 +319,32 @@
             filter: invert(1);
         }
 
+        /* 备注输入区域 */
+        .note-section {
+            margin-bottom: 20px;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 12px;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .note-input::placeholder {
+            color: #666;
+        }
+
+        .note-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #888;
+        }
+
         /* 保存按钮 */
         .save-btn {
             width: 100%;
@@ -550,8 +576,9 @@
 
         .record-info {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
         }
 
         .record-category {
@@ -573,6 +600,16 @@
         .record-date {
             font-size: 12px;
             color: #888;
+        }
+
+        .record-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .record-amount {
@@ -738,6 +775,13 @@
                 <div class="date-section">
                     <div class="section-title">日期</div>
                     <input type="date" class="date-picker" id="datePicker">
+                </div>
+                
+                <!-- 备注输入 -->
+                <div class="note-section">
+                    <div class="section-title">备注（最多10字）</div>
+                    <input type="text" class="note-input" id="noteInput" placeholder="请输入备注" maxlength="10">
+                    <div class="note-counter" id="noteCounter">0/10</div>
                 </div>
                 
                 <!-- 保存按钮 -->
@@ -952,6 +996,15 @@
             // 文件选择事件
             document.getElementById('importFile').addEventListener('change', importData);
             
+            // 备注输入字符计数
+            const noteInput = document.getElementById('noteInput');
+            const noteCounter = document.getElementById('noteCounter');
+            
+            noteInput.addEventListener('input', () => {
+                const length = noteInput.value.length;
+                noteCounter.textContent = `${length}/10`;
+            });
+            
             // 底部导航切换事件
             document.querySelectorAll('.nav-item').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1148,6 +1201,7 @@
                                 <span>${record.category}</span>
                             </div>
                             <div class="record-date">${record.date}</div>
+                            ${record.note ? `<div class="record-note">${record.note}</div>` : ''}
                         </div>
                         <div class="record-amount ${record.type}">
                             ${record.type === 'expense' ? '-' : '+'}${record.amount.toFixed(2)}
@@ -1290,6 +1344,9 @@
                 return;
             }
             
+            // 获取备注
+            const note = document.getElementById('noteInput').value;
+            
             // 创建记录对象
             const record = {
                 id: Date.now().toString(),
@@ -1297,6 +1354,7 @@
                 amount: parseFloat(currentAmount),
                 category: currentCategory,
                 date: document.getElementById('datePicker').value,
+                note: note,
                 timestamp: Date.now()
             };
             
@@ -1323,6 +1381,12 @@
             currentCategory = '餐饮';
             document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector('.category-btn[data-category="餐饮"]').classList.add('active');
+            
+            // 重置备注输入框
+            const noteInput = document.getElementById('noteInput');
+            const noteCounter = document.getElementById('noteCounter');
+            noteInput.value = '';
+            noteCounter.textContent = '0/10';
         }
         
         // 加载记录
@@ -1343,6 +1407,7 @@
                             <span>${record.category}</span>
                         </div>
                         <div class="record-date">${record.date}</div>
+                        ${record.note ? `<div class="record-note">${record.note}</div>` : ''}
                     </div>
                     <div class="record-amount ${record.type}">
                         ${record.type === 'expense' ? '-' : '+'}${record.amount.toFixed(2)}
